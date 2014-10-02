@@ -20,15 +20,16 @@ if (mysqli_connect_errno()) {
 
 
 $account_names = mysqli_query($con, "SELECT account_name FROM accounts");
-//$time = times();
 
-$date = new DateTime('now', new DateTimeZone('Asia/colombo'));
-echo $date->format('d-m-Y H:i:s');
+$currenttime = time();
+echo $currenttime;
 
-echo $time;
 while ($row = mysqli_fetch_array($account_names, MYSQL_NUM)) {
-//    print_r($row[0]);
+
+    $following = 0;
+    $followers = 0;
     $var_account_name = $row[0];
+
 
     $dom = new DOMDocument;
     $temp_html = $dom->loadHTMLFile("sourceFile.html");
@@ -38,23 +39,19 @@ while ($row = mysqli_fetch_array($account_names, MYSQL_NUM)) {
         $nam = $book->getElementsByTagName('span')->item(2)->nodeValue;
 
 
+
         if(!strcmp(trim($nam),"followers"))
         {
-            echo trim($num);
-            echo trim($nam).'<br>';
-
+            $followers = $num;
         }
         elseif(!strcmp(trim($nam),"following"))
         {
-            echo trim($num);
-            echo trim($nam).'<br>';
+            $following = $num;
         }
 
-            //insert into database
-       // insert($time, $followers, $followings, $account_id);
 
     }
-
+    mysqli_query($con, "INSERT INTO stats (account_id, following, followers,timestamps) VALUES ('$var_account_name','$following','$followers','$currenttime')");
 
 }
 
