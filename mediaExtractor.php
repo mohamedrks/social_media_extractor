@@ -7,6 +7,15 @@
  */
 include 'simple.php';
 
+function scrape_insta($username) {
+    $insta_source = file_get_contents('http://instagram.com/'.$username);
+    $shards = explode('window._sharedData = ', $insta_source);
+    $insta_json = explode('"}};', $shards[1]);
+    $insta_array = json_decode($insta_json[0].'"}}', TRUE);
+    return $insta_array;
+}
+
+
 
 $con = mysqli_connect("localhost", "root", "", "social_media_schema");
 
@@ -30,28 +39,12 @@ while ($row = mysqli_fetch_array($account_names, MYSQL_NUM)) {
     $followers = 0;
     $var_account_name = $row[0];
 
+    echo '<pre>';
 
-    $dom = new DOMDocument;
-    $temp_html = $dom->loadHTMLFile("sourceFile.html");
-    $books = $dom->getElementsByTagName('span');
-    foreach ($books as $book) {
-        $num = $book->getElementsByTagName('span')->item(1)->nodeValue;
-        $nam = $book->getElementsByTagName('span')->item(2)->nodeValue;
-
-
-
-        if(!strcmp(trim($nam),"followers"))
-        {
-            $followers = $num;
-        }
-        elseif(!strcmp(trim($nam),"following"))
-        {
-            $following = $num;
-        }
-
-
-    }
-    mysqli_query($con, "INSERT INTO stats (account_id, following, followers,timestamps) VALUES ('$var_account_name','$following','$followers','$currenttime')");
+    $counts = scrape_insta($var_account_name)['entry_data']['UserProfile'][0]['user']['counts'];
+    print_r($counts);
+    echo '</pre>';
+    mysqli_query($con, "INSERT INTO stats (account_id, following, followers,timestamps) VALUES ('$var_account_name',".$counts['followed_by'].",".$counts['follows'].",'$currenttime')");
 
 }
 

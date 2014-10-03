@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Instagram stats Chart</title>
+    <!-- <link href="nv.d3.css" rel="stylesheet" type="text/css">
+    <script src="d3.v3.js"></script>
+    <script src="nv.d3.js"></script>
+-->
+    <link media="all" href="https://dl.dropboxusercontent.com/u/10933989/nv.d3.css" type="text/css" rel="stylesheet"/>
+    <script src="https://dl.dropboxusercontent.com/u/10933989/d3.min.js" type="text/javascript"></script>
+    <script src="https://dl.dropboxusercontent.com/u/10933989/nv.d3.min.js" type="text/javascript"></script>
+    <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    <script>
+        $("#date1, #date2").datepicker({
+            defaultDate: "+1w",
+            changeMonth: true,
+            numberOfMonths: 1,
+            onSelect: function (selectedDate) {
+                var option = this.id == "abc" ? "minDate" : "maxDate",
+                        instance = $(this).data("datepicker"),
+                        date = $.datepicker.parseDate(
+                                instance.settings.dateFormat || $.datepicker._defaults.dateFormat,
+                                selectedDate, instance.settings);
+                dates.not(this).datepicker("option", option, date);
+            }
+        });
+    </script>
+
+</head>
+
+<body>
+<div>
+    <label for="date1">Date:</label>
+    <input type="text" id="date1" name="date1" value="01/01/2014"/>
+    <label for="date2">to</label>
+    <input type="text" id="date2" name="date2" value=""/>
+</div>
+<svg style='height:600px'></svg>
+<script>
+    data1 = [
+
+        {
+            "timestamps": "1412229748",
+            "following": "6699"
+
+        },
+        {
+            "timestamps": "1412229747",
+            "following": "8699"
+
+        },
+        {
+            "timestamps": "1412229757",
+            "following": "6699"
+
+        },
+        {
+            "timestamps": "1412229767",
+            "following": "3699"
+
+        },
+        {
+            "timestamps": "1412229767",
+            "following": "2699"
+
+        },
+        {
+            "timestamps": "1412229767",
+            "following": "299"
+
+        }
+
+
+    ]
+
+
+
+    data1 = data1.map(function (n) {
+        return {
+            "x": n.timestamps,
+            "y": n.following
+        }
+    });
+
+    data3 = [
+        {
+            "key": "stream1",
+            "values": data1,
+            "yAxis": "1"
+        }
+    ];
+
+    //                {
+    //                    key: 'series1',
+    //                    values: [{
+    //                            x: 0,
+    //                            y: 10
+    //                        }, {
+    //                            x: 1,
+    //                            y: 44
+    //                        }, {
+    //                            x: 2,
+    //                            y: -3
+    //                        }
+    //                    ]
+    //                }, {
+    //                    key: 'series2',
+    //                    values: [{
+    //                            x: 0,
+    //                            y: 25
+    //                        }, {
+    //                            x: 1,
+    //                            y: 11
+    //                        }, {
+    //                            x: 2,
+    //                            y: 3
+    //                        }
+    //                    ]
+    //                }, {
+    //                    key: 'series3',
+    //                    values: [{
+    //                            x: 0,
+    //                            y: 10
+    //                        }, {
+    //                            x: 1,
+    //                            y: 44
+    //                        }, {
+    //                            x: 2,
+    //                            y: 3
+    //                        }
+    //                    ]
+    //                }, {
+    //                    key: 'series4',
+    //                    values: [{
+    //                            x: 0,
+    //                            y: 10
+    //                        }, {
+    //                            x: 1,
+    //                            y: 44
+    //                        }, {
+    //                            x: 2,
+    //                            y: 3
+    //                        }
+    //                    ]
+    //                }
+
+
+    nv.addGraph(function () {
+        //                var chart = nv.models.multiBarChart().stacked(false).showControls(false);
+        var chart = nv.models.multiBarChart();
+
+        chart.xAxis
+                .axisLabel("X-axis Label")
+                .tickFormat(function (d) {
+                    var dx = data3[0].values[d] && data3[0].values[d][0] || 0;
+                    return d3.time.format('%x')(new Date(dx))
+                });
+
+        chart.yAxis
+                .axisLabel("Y-axis Label")
+                .tickFormat(d3.format("d"));
+        //                chart.yAxis.scale().domain([0, 10]);
+        //                chart.forceY([-10, 10]);
+
+
+        d3.select("svg")
+                .datum(data3)
+                .transition().duration(500).call(chart);
+
+        nv.utils.windowResize(function () {
+            chart.update();
+        });
+
+        return chart;
+    });
+</script>
+</body>
+
+</html>

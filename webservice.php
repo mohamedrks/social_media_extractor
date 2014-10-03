@@ -6,42 +6,52 @@
  * Time: 9:12 AM
  */
 
-$con = mysqli_connect("localhost", "root", "", "social_media_schema");
 
-if (mysqli_connect_errno()) {
-    echo "Failed to connect to MySQL: " . mysqli_connect_error();
-    echo "<br>";
-} else {
-    echo "Succesfully connected to DB ";
-    echo "<br>";
+$con = mysql_connect("localhost", "root", "");
+
+if (!$con) {
+    die('could no connect' . mysql_error());
 }
+mysql_select_db('social_media_schema', $con);
+
+if(!empty($_REQUEST['startTime'])) { $timeStart= $_REQUEST['startTime']; } else { $timeStart = 0; }
+
+if(!empty($_REQUEST['endTime'])) { $timeEnd= $_REQUEST['endTime']; } else { $timeEnd = time(); }
 
 
-$timeStart = '1412229747'; //$_REQUEST['startTime'];
-$timeEnd = '1412231828'; //$_REQUEST['endTime'];
-
-//$sqlQuery = "SELECT a.account_name, s.* FROM accounts a LEFT JOIN stats s ON a.account_id = s.account_id
-//WHERE s.time BETWEEN " . $timeStart . " AND " . $timeEnd;
-
-$sqlQuery = "SELECT a.account_name, s.* FROM accounts a
+$sqlQuery = "SELECT a.account_name, s.following , s.followers , s.timestamps FROM accounts a
               LEFT JOIN stats s ON a.account_name = s.account_id
-              WHERE s.timestamps BETWEEN  '$timeStart'  AND  '$timeEnd' group by a.account_name";
+              WHERE s.timestamps BETWEEN  '$timeStart'  AND  '$timeEnd'
+              UNION ALL
+              (SELECT 'total', SUM(s.following), SUM(s.followers), s.timestamps FROM stats s
+              GROUP BY s.timestamps)";
 
-$results = mysqli_query($con, $sqlQuery);
 
-echo $results;
 
-while ($row = mysql_fetch_assoc($query)) {
-    echo  $row['account_name'];
+$result = mysql_query($sqlQuery, $con);
+
+$values = array();
+
+
+while ($row = mysql_fetch_array($result)) {
+
+    if(empty($values[$row['account_name']]))
+       $values[$row['account_name']] =  array();
+
+    array_push( $values[$row['account_name']], array("timestamps"=>$row['timestamps'], "following" => str_replace( ',', '', $row['following'] ), "followers" => str_replace( ',', '', $row['followers']) ) );
 
 }
+
+echo json_encode($values) . '<br>';
+
+mysql_close($con);
+
+
+
 /* Output header */
-header('Content-type: application/json');
+//header('Content-type: application/json');
 
 //echo json_encode($rowArr);
-
-@mysql_close($conn);
-
 
 
 //if($_SERVER['REQUEST_METHOD'] == "POST"){
@@ -63,3 +73,5 @@ header('Content-type: application/json');
 //    $json = array("status" => 0, "msg" => "Request method not accepted");
 //}
 
+
+//echo "</table>";
