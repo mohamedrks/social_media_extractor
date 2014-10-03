@@ -32,10 +32,10 @@ function convert($result) {
 
     }
 
-    foreach($data as $item) {
-        list($key, $date, $value) = $item;
-        $intermediate[$key][] = array($date, $value);
-    }
+//    foreach($data as $item) {
+//        list($key, $date, $value) = $item;
+//        $intermediate[$key][] = array($date, $value);
+//    }
 
     $output = array();
 
