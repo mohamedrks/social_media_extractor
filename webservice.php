@@ -18,31 +18,59 @@ if(!empty($_REQUEST['startTime'])) { $timeStart= $_REQUEST['startTime']; } else 
 
 if(!empty($_REQUEST['endTime'])) { $timeEnd= $_REQUEST['endTime']; } else { $timeEnd = time(); }
 
+function convert($result) {
+
+    $intermediate = array();
+
+    while($item = mysql_fetch_assoc($result)) {
+
+        $key = $item['account_name'];
+        $date = $item['timestamps'];
+        $value = $item['followers'];
+
+        $intermediate[$key][] = array($date, $value);
+
+    }
+
+    foreach($data as $item) {
+        list($key, $date, $value) = $item;
+        $intermediate[$key][] = array($date, $value);
+    }
+
+    $output = array();
+
+    foreach($intermediate as $key => $values) {
+        $output[] = array(
+            'key' => $key,
+            'values' => $values
+        );
+    }
+
+    return $output;
+
+    // The rest of the function stays the same
+}
 
 $sqlQuery = "SELECT a.account_name, s.following , s.followers , s.timestamps FROM accounts a
               LEFT JOIN stats s ON a.account_name = s.account_id
               WHERE s.timestamps BETWEEN  '$timeStart'  AND  '$timeEnd'
-              UNION ALL
-              (SELECT 'total', SUM(s.following), SUM(s.followers), s.timestamps FROM stats s
-              GROUP BY s.timestamps)";
+             ORDER BY a.account_name, s.timestamps";
 
 
 
 $result = mysql_query($sqlQuery, $con);
 
 $values = array();
+$count = 0;
+
+if($result) {
 
 
-while ($row = mysql_fetch_array($result)) {
-
-    if(empty($values[$row['account_name']]))
-       $values[$row['account_name']] =  array();
-
-    array_push( $values[$row['account_name']], array("timestamps"=>$row['timestamps'], "following" => str_replace( ',', '', $row['following'] ), "followers" => str_replace( ',', '', $row['followers']) ) );
-
+    $jsonData = convert($result);
 }
 
-echo json_encode($values) . '<br>';
+echo json_encode($jsonData);
+
 
 mysql_close($con);
 

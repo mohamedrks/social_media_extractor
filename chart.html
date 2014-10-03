@@ -39,142 +39,36 @@
     <input type="text" id="date2" name="date2" value=""/>
 </div>
 <svg style='height:600px'></svg>
-<script>
-    data1 = [
-
-        {
-            "timestamps": "1412229748",
-            "following": "6699"
-
-        },
-        {
-            "timestamps": "1412229747",
-            "following": "8699"
-
-        },
-        {
-            "timestamps": "1412229757",
-            "following": "6699"
-
-        },
-        {
-            "timestamps": "1412229767",
-            "following": "3699"
-
-        },
-        {
-            "timestamps": "1412229767",
-            "following": "2699"
-
-        },
-        {
-            "timestamps": "1412229767",
-            "following": "299"
-
-        }
+<script type="text/javascript">
 
 
-    ]
+    d3.json("http://localhost:2503/webservice.php", function(data) {
+
+        nv.addGraph(function() {
+            var chart = nv.models.multiBarChart()
+                    .stacked(true)
+                    .margin({right: 100})
+                    .x(function(d) { return d[0] })   //We can modify the data accessor functions...
+                    .y(function(d) { return d[1]/1.0 })   //...in case your data is formatted differently.
+
+            //Format x-axis labels with custom function.
+            chart.xAxis
+                    .showMaxMin(false)
+                    .tickFormat(function(d) { return d3.time.format('%b %d')(new Date(d*1000)) });
+
+            chart.yAxis
+                    .showMaxMin(true)
+                    .ticks(0)
+                    .tickFormat(d3.format(',.f'));
+
+            d3.select('svg')
+                    .datum(data)
+                    .transition().duration(500).call(chart);
+            nv.utils.windowResize(chart.update);
 
 
-
-    data1 = data1.map(function (n) {
-        return {
-            "x": n.timestamps,
-            "y": n.following
-        }
-    });
-
-    data3 = [
-        {
-            "key": "stream1",
-            "values": data1,
-            "yAxis": "1"
-        }
-    ];
-
-    //                {
-    //                    key: 'series1',
-    //                    values: [{
-    //                            x: 0,
-    //                            y: 10
-    //                        }, {
-    //                            x: 1,
-    //                            y: 44
-    //                        }, {
-    //                            x: 2,
-    //                            y: -3
-    //                        }
-    //                    ]
-    //                }, {
-    //                    key: 'series2',
-    //                    values: [{
-    //                            x: 0,
-    //                            y: 25
-    //                        }, {
-    //                            x: 1,
-    //                            y: 11
-    //                        }, {
-    //                            x: 2,
-    //                            y: 3
-    //                        }
-    //                    ]
-    //                }, {
-    //                    key: 'series3',
-    //                    values: [{
-    //                            x: 0,
-    //                            y: 10
-    //                        }, {
-    //                            x: 1,
-    //                            y: 44
-    //                        }, {
-    //                            x: 2,
-    //                            y: 3
-    //                        }
-    //                    ]
-    //                }, {
-    //                    key: 'series4',
-    //                    values: [{
-    //                            x: 0,
-    //                            y: 10
-    //                        }, {
-    //                            x: 1,
-    //                            y: 44
-    //                        }, {
-    //                            x: 2,
-    //                            y: 3
-    //                        }
-    //                    ]
-    //                }
-
-
-    nv.addGraph(function () {
-        //                var chart = nv.models.multiBarChart().stacked(false).showControls(false);
-        var chart = nv.models.multiBarChart();
-
-        chart.xAxis
-                .axisLabel("X-axis Label")
-                .tickFormat(function (d) {
-                    var dx = data3[0].values[d] && data3[0].values[d][0] || 0;
-                    return d3.time.format('%x')(new Date(dx))
-                });
-
-        chart.yAxis
-                .axisLabel("Y-axis Label")
-                .tickFormat(d3.format("d"));
-        //                chart.yAxis.scale().domain([0, 10]);
-        //                chart.forceY([-10, 10]);
-
-
-        d3.select("svg")
-                .datum(data3)
-                .transition().duration(500).call(chart);
-
-        nv.utils.windowResize(function () {
-            chart.update();
+            return chart;
         });
-
-        return chart;
     });
 </script>
 </body>
